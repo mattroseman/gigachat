@@ -10,6 +10,8 @@ from chat_message import ChatMessage, ChatType
 
 
 class DGGConnection(BaseConnection):
+    chat_type = ChatType.DGG
+
     def is_live(self):
         # DGG is always live
         return True

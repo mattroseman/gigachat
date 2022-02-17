@@ -7,6 +7,8 @@ from threading import Thread
 from config import CONFIG
 from utils.circular_buffer import CircularBuffer
 
+LOG = logging.getLogger(__name__)
+
 
 class AuthenticationError(Exception):
     pass
@@ -19,6 +21,14 @@ class BaseConnection(ABC, Thread):
 
         Thread.__init__(self, daemon=True)
 
+    @property
+    @abstractmethod
+    def chat_type(self):
+        """
+        chat_type should be a ChatType enum
+        """
+        pass
+
     @abstractmethod
     def is_live(self):
         pass
@@ -29,22 +39,25 @@ class BaseConnection(ABC, Thread):
     def listen(self):
         while True:
             if self.is_live():
+                LOG.info(f'Listening to {self.chat_type.name} chat')
                 try:
                     self._listen()
                 except AuthenticationError:
                     raise AuthenticationError
                 except Exception:
-                    logging.error(self.debug_lines)
-                    logging.error(traceback.format_exc())
+                    LOG.error(self.debug_lines)
+                    LOG.error(traceback.format_exc())
 
-            time.sleep(CONFIG['CONNECTION_RETRY_COOLDOWN'])
+            cooldown_time = CONFIG['CONNECTION_RETRY_COOLDOWN']
+            LOG.info(f'{self.chat_type.name} chat connection failed, retrying in {cooldown_time} seconds')
+            time.sleep(cooldown_time)
 
     def _publish_message(self, chat_message):
         """
         publish message to redis pub/sub
         """
         prefix = chat_message.get_chat_type_prefix()
-        logging.info(f'{prefix} | {chat_message.sender}: {chat_message.message}')
+        LOG.debug(f'{prefix} | {chat_message.sender}: {chat_message.message}')
         self.debug_lines.enqueue(chat_message)
 
         if self.redis_connection:

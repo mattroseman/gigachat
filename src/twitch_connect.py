@@ -12,6 +12,8 @@ CHAT_PING_REGEX = re.compile(r'PING (:tmi.twitch.tv)')
 
 
 class TwitchConnection(BaseConnection):
+    chat_type = ChatType.TWITCH
+
     def __init__(self, redis_connection=None):
         super().__init__(redis_connection)
 

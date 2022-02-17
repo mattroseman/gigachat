@@ -26,7 +26,7 @@ class ChatMessage:
         return json.dumps({
             'sender': self.sender,
             'message': self.message,
-            'chat-type': str(self.chat_type),
+            'chat-type': self.chat_type.name,
             'timestamp': self.timestamp.isoformat()
         })
 

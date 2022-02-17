@@ -13,6 +13,8 @@ DGG_LIVE_BROADCAST_ID_REGEX = re.compile(r'<link rel="canonical" href="https://w
 
 
 class YTConnection(BaseConnection):
+    chat_type = ChatType.YOUTUBE
+
     def __init__(self, redis_connection=None):
         super().__init__(redis_connection)
 
