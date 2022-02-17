@@ -1,34 +1,47 @@
-import asyncio
-import threading
+import logging
 
-from irc_connect import IRCConnection
+# import redis
+
+from twitch_connect import TwitchConnection
 from dgg_connect import DGGConnection
-from chat_message import ChatType
-
-from utils.circular_buffer import CircularBuffer
-
-MSG_BUFFER_SIZE = 10
+from yt_connect import YTConnection
 
 
-async def main():
-    irc_connection = IRCConnection()
+def main():
+    logging.info('Setting up connections to all chats')
+
+    twitch_connection = TwitchConnection()
     dgg_connection = DGGConnection()
+    yt_connection = YTConnection()
 
-    message_buffer = CircularBuffer(MSG_BUFFER_SIZE)
+    logging.info('Creating and starting threads to listen in on all chats')
 
-    twitch_thread = threading.Thread(target=irc_connection.listen, args=('destiny', message_buffer), daemon=True)
-    dgg_thread = threading.Thread(target=asyncio.run, args=(dgg_connection.listen(message_buffer),), daemon=True)
+    # redis_thread = threading.Thread(target=read_messages, args=(redis_connection,), daemon=True)
 
-    twitch_thread.start()
-    dgg_thread.start()
+    twitch_connection.start()
+    dgg_connection.start()
+    yt_connection.start()
 
-    for chat_message in message_buffer.listen():
-        chat_type_prefix = 'D' if chat_message.chat_type == ChatType.DGG else 'T'
-        print(f'{chat_type_prefix} | {chat_message.sender}: {chat_message.message}')
+    # redis_thread.start()
 
-    twitch_thread.join()
-    dgg_thread.join()
+    twitch_connection.join()
+    dgg_connection.join()
+    yt_connection.join()
+
+    # redis_thread.join()
+
+
+def read_messages(redis_connection):
+    p = redis_connection.pubsub()
+    p.subscribe('chat-messages')
+
+    print('listening for messages through redis')
+    for message in p.listen():
+        print(message)
+
+    p.unsubscribe()
 
 
 if __name__ == '__main__':
-    asyncio.run(main())
+    logging.basicConfig(level=logging.INFO, format='%(message)s')
+    main()

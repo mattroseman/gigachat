@@ -19,22 +19,17 @@ class CircularBuffer:
             self.size = min(self.size + 1, self.capacity)
 
     def get(self):
-        result = []
+        # result = []
 
-        i = (self._head - 1) % self.capacity
-        while i != self._head:
-            result.append(self._queue[i].message)
-            i -= 1
-            i %= self.capacity
+        # i = (self._head - 1) % self.capacity
+        # while i != self._head:
+        #     result.append(self._queue[i].message)
+        #     i -= 1
+        #     i %= self.capacity
 
-        return result
+        # return result
 
-    def listen(self):
-        last_head = self._head
-        while True:
-            while self._head == last_head:
-                pass
+        return [item for item in (self._queue[self._head - 1:] + self._queue[:self._head - 1]) if item is not None]
 
-            yield self._queue[self._head - 1]
-
-            last_head = self._head
+    def __str__(self):
+        return '\n'.join([str(item) for item in self.get()])
