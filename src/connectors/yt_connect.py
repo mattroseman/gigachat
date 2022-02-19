@@ -5,8 +5,14 @@ import logging
 
 import requests
 
+# add project's root dir to sys path if file run as main
+if __name__ == '__main__':
+    import os
+    import sys
+    sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
+
 from config import CONFIG
-from base_connect import BaseConnection
+from connectors.base_connect import BaseConnection
 from chat_message import ChatMessage, ChatType
 
 DGG_LIVE_BROADCAST_ID_REGEX = re.compile(r'<link rel="canonical" href="https://www.youtube.com/watch\?v=([^&]+?)">')

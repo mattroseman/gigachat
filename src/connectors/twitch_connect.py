@@ -2,8 +2,14 @@ import socket
 import re
 import logging
 
+# add project's root dir to sys path if file run as main
+if __name__ == '__main__':
+    import os
+    import sys
+    sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
+
 from config import CONFIG
-from base_connect import BaseConnection, AuthenticationError
+from connectors.base_connect import BaseConnection, AuthenticationError
 from chat_message import ChatMessage, ChatType
 
 CHAT_AUTH_FAILED_REGEX = re.compile(r'^:tmi.twitch.tv NOTICE * :Login authentication failed$')

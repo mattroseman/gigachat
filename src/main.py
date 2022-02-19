@@ -4,9 +4,9 @@ import threading
 import redis
 
 from config import CONFIG
-from twitch_connect import TwitchConnection
-from dgg_connect import DGGConnection
-from yt_connect import YTConnection
+from connectors.twitch_connect import TwitchConnection
+from connectors.dgg_connect import DGGConnection
+from connectors.yt_connect import YTConnection
 
 LOG = logging.getLogger(__name__)
 

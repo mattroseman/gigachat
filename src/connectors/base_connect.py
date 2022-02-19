@@ -57,7 +57,7 @@ class BaseConnection(ABC, Thread):
         publish message to redis pub/sub
         """
         prefix = chat_message.get_chat_type_prefix()
-        LOG.debug(f'{prefix} | {chat_message.sender}: {chat_message.message}')
+        LOG.info(f'{prefix} | {chat_message.sender}: {chat_message.message}')
         self.debug_lines.enqueue(chat_message)
 
         if self.redis_connection:
