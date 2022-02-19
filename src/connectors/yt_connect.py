@@ -66,6 +66,8 @@ class YTConnection(BaseConnection):
             response = requests.get(CONFIG['YOUTUBE_API_LIVE_CHAT_MESSAGE_URL'], params=params)
 
             if not response.ok:
+                if response.status_code == 403 and response.json()['error']['message'] == 'The live chat is no longer live.':
+                    return
                 raise RuntimeError(f'Request failed to get live chat messages. Received a {response.status_code}\n{response.text}')
 
             body = response.json()
