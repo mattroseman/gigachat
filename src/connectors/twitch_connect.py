@@ -21,8 +21,6 @@ class TwitchConnection(BaseConnection):
     chat_type = ChatType.TWITCH
 
     def __init__(self, redis_connection=None):
-        super().__init__(redis_connection)
-
         self.IRC = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.IRC.connect((CONFIG['TWITCH_CHAT_URL'], CONFIG['TWITCH_CHAT_PORT']))
 
@@ -30,19 +28,21 @@ class TwitchConnection(BaseConnection):
         self._send_data('NICK %s' % CONFIG['TWITCH_CHAT_NICK'])
         self._send_data('CAP REQ :twitch.tv/membership')
 
+        super().__init__(redis_connection)
+
     def is_live(self):
         # TODO write this
         return True
 
     def _listen(self):
         #  clear the IRC buffer
-        readbuffer = self.IRC.recv(CONFIG['TWITCH_BUFFER_SIZE']).decode('UTF-8', errors='ignore')
+        readbuffer = self._get_data()
 
         #  join the IRC channel
         self._send_data('JOIN #{0}'.format(CONFIG['TWITCH_CHANNEL']))
 
         while True:
-            readbuffer += self.IRC.recv(CONFIG['TWITCH_BUFFER_SIZE']).decode('UTF-8', errors='ignore')
+            readbuffer += self._get_data()
             lines = readbuffer.split('\r\n')
 
             # copy the last line (that doesn't have the ending carriage return) into the next readbuffer
@@ -59,6 +59,12 @@ class TwitchConnection(BaseConnection):
                 if CHAT_PING_REGEX.match(line):
                     response = 'PONG ' + CHAT_PING_REGEX.match(line).group(1)
                     self._send_data(response)
+
+    def _get_data(self):
+        try:
+            return self.IRC.recv(CONFIG['TWITCH_BUFFER_SIZE']).decode('UTF-8', errors='ignore')
+        except ConnectionResetError:
+            self.LOG.warning('Twitch connection was reset, trying again.')
 
     def _send_data(self, command):
         """
@@ -80,6 +86,7 @@ class TwitchConnection(BaseConnection):
 
 if __name__ == '__main__':
     logging.basicConfig(level=logging.INFO, format='%(message)s')
+    logging.getLogger('TwitchConnection').setLevel(logging.DEBUG)
 
     twitch_connection = TwitchConnection()
 

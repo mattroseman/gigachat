@@ -158,6 +158,7 @@ class YTConnection(BaseConnection):
 
 if __name__ == '__main__':
     logging.basicConfig(level=logging.INFO, format='%(message)s')
+    logging.getLogger('YTConnection').setLevel(logging.DEBUG)
 
     yt_connection = YTConnection()
 

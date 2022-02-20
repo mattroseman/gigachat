@@ -7,8 +7,6 @@ from threading import Thread
 from config import CONFIG
 from utils.circular_buffer import CircularBuffer
 
-LOG = logging.getLogger(__name__)
-
 
 class AuthenticationError(Exception):
     pass
@@ -16,6 +14,9 @@ class AuthenticationError(Exception):
 
 class BaseConnection(ABC, Thread):
     def __init__(self, redis_connection=None):
+        self.LOG = logging.getLogger(__name__)
+        self.LOG.setLevel(CONFIG['LOGGING_LEVEL'])
+
         self.redis_connection = redis_connection
         self.debug_lines = CircularBuffer(CONFIG['DEBUG_MESSAGE_HISTORY'])
 
@@ -39,17 +40,17 @@ class BaseConnection(ABC, Thread):
     def listen(self):
         while True:
             if self.is_live():
-                LOG.info(f'Listening to {self.chat_type.name} chat')
+                self.LOG.info(f'Listening to {self.chat_type.name} chat')
                 try:
                     self._listen()
                 except AuthenticationError:
                     raise AuthenticationError
                 except Exception:
-                    LOG.error(self.debug_lines)
-                    LOG.error(traceback.format_exc())
+                    self.LOG.error(self.debug_lines)
+                    self.LOG.error(traceback.format_exc())
 
             cooldown_time = CONFIG['CONNECTION_RETRY_COOLDOWN']
-            LOG.info(f'{self.chat_type.name} chat connection failed, retrying in {cooldown_time} seconds')
+            self.LOG.debug(f'{self.chat_type.name} chat connection failed, retrying in {cooldown_time} seconds')
             time.sleep(cooldown_time)
 
     def _publish_message(self, chat_message):
@@ -57,7 +58,7 @@ class BaseConnection(ABC, Thread):
         publish message to redis pub/sub
         """
         prefix = chat_message.get_chat_type_prefix()
-        LOG.info(f'{prefix} | {chat_message.sender}: {chat_message.message}')
+        self.LOG.debug(f'{prefix} | {chat_message.sender}: {chat_message.message}')
         self.debug_lines.enqueue(chat_message)
 
         if self.redis_connection:

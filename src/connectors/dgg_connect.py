@@ -24,8 +24,6 @@ class DGGConnection(BaseConnection):
 
     def _listen(self):
         asyncio.run(self._listen_dgg())
-        # loop = asyncio.get_event_loop()
-        # loop.run_until_complete(self._listen_dgg())
 
     async def _listen_dgg(self):
         async with websockets.connect(CONFIG['DGG_CHAT_URL'], ping_interval=None) as ws:
@@ -69,6 +67,7 @@ class DGGConnection(BaseConnection):
 
 if __name__ == '__main__':
     logging.basicConfig(level=logging.INFO, format='%(message)s')
+    logging.getLogger('DGGConnection').setLevel(logging.DEBUG)
 
     dgg_connection = DGGConnection()
     dgg_connection.listen()

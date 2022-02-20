@@ -1,2 +1,7 @@
 ipdb
+requests
 redis
+websockets
+flask
+flask_sockets
+gunicorn
