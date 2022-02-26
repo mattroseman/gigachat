@@ -52,59 +52,75 @@ class YTConnection(BaseConnection):
         next_page_token = None
 
         # do a dry request to catch up to the latest messages, so the messages yielded aren't always behind
-        response = requests.get(CONFIG['YOUTUBE_API_LIVE_CHAT_MESSAGE_URL'], params=params)
-        if not response.ok:
-            raise RuntimeError(f'Request failed to get live chat messages. Received a {response.status_code}\n{response.text}')
-        next_page_token = response.json()['nextPageToken']
-        time.sleep(response.json()['pollingIntervalMillis'] / 1000)
+        response = self._poll_api(params)
+        if response is None:
+            return
+
+        next_page_token = response['nextPageToken']
+        time.sleep(response['pollingIntervalMillis'] / 1000)
 
         while True:
             if next_page_token:
                 params['pageToken'] = next_page_token
 
             last_request_time = datetime.utcnow()
-            response = requests.get(CONFIG['YOUTUBE_API_LIVE_CHAT_MESSAGE_URL'], params=params)
+            response = self._poll_api(params)
+            if response is None:
+                return
 
-            if not response.ok:
-                if response.status_code == 403 and response.json()['error']['message'] == 'The live chat is no longer live.':
-                    return
-                raise RuntimeError(f'Request failed to get live chat messages. Received a {response.status_code}\n{response.text}')
+            next_page_token = response['nextPageToken']
 
-            body = response.json()
-
-            next_page_token = body['nextPageToken']
-
-            for chat_message in YTConnection._parse_live_chat_messages(body['items']):
+            for chat_message in YTConnection._parse_live_chat_messages(response['items']):
                 self._publish_message(chat_message)
 
             # sleep what is required to catch up to the `pollingIntervalMillis` (recommended by the google-api response) before the next request
             time_since_last_request = datetime.utcnow() - last_request_time
 
-            required_polling_interval = timedelta(microseconds=body['pollingIntervalMillis'] * 1000)
+            required_polling_interval = timedelta(microseconds=response['pollingIntervalMillis'] * 1000)
             polling_interval = max(required_polling_interval, timedelta(seconds=CONFIG['YOUTUBE_LIVE_CHAT_MIN_POLLING_INTERVAL']))
 
             time_to_sleep = max((polling_interval - time_since_last_request).total_seconds(), 0)
             time.sleep(time_to_sleep)
 
     @staticmethod
+    def _poll_api(params):
+        response = requests.get(CONFIG['YOUTUBE_API_LIVE_CHAT_MESSAGE_URL'], params=params)
+        if not response.ok:
+            if response.status_code == 403 and response.json()['error']['message'] == 'The live chat is no longer live.':
+                return
+
+            raise RuntimeError(f'Request failed to get live chat messages. Received a {response.status_code}\n{response.text}')
+
+        return response.json()
+
+    @staticmethod
     def _get_live_broadcast_id(channel_id):
         """
         crawls youtube to guess if the channel with the given id is live, and if it is, gets its live broadcast id
         """
-        live_channel_url = f'https://www.youtube.com/channel/{channel_id}/live'
+        # youtube has 3 different types of url's for a channel
+        live_channel_urls = [
+            f'https://www.youtube.com/user/{channel_id}/live',  # user name
+            f'https://www.youtube.com/c/{channel_id}/live',  # custom url
+            f'https://www.youtube.com/channel/{channel_id}/live'  # channel name
+        ]
 
-        response = requests.get(live_channel_url)
+        for live_channel_url in live_channel_urls:
+            response = requests.get(live_channel_url)
 
-        if not response.ok:
-            raise RuntimeError(f'Request failed to get live broadcast id. Received a {response.status_code}\n{response.text}')
+            if not response.ok:
+                if response.status_code == 404:
+                    continue
 
-        # look for a canonical link in header, which will be present if broadcast is live
-        match = DGG_LIVE_BROADCAST_ID_REGEX.search(response.text)
+                raise RuntimeError(f'Request failed to get live broadcast id. Received a {response.status_code}\n{response.text}')
 
-        if not match:
-            return
+            # look for a canonical link in header, which will be present if broadcast is live
+            match = DGG_LIVE_BROADCAST_ID_REGEX.search(response.text)
 
-        return match.group(1)
+            if not match:
+                continue
+
+            return match.group(1)
 
     @staticmethod
     def _get_live_chat_id(broadcast_id):

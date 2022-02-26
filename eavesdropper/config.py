@@ -6,7 +6,7 @@ load_dotenv('../secrets.env')
 
 
 CONFIG = {
-    'LOGGING_LEVEL': os.environ.get('LOGGING_LEVEL', 'INFO'),
+    'LOGGING_LEVEL': os.environ.get('LOGGING_LEVEL', 'DEBUG'),
     'DEBUG_MESSAGE_HISTORY': int(os.environ.get('DEBUG_MESSAGE_HISTORY', '10')),
     'CONNECTION_RETRY_COOLDOWN': int(os.environ.get('CONNECTION_RETRY_COOLDOWN', '60')),
 
@@ -20,8 +20,8 @@ CONFIG = {
 
     'YOUTUBE_API_LIVE_BROADCAST_URL': os.environ.get('YOUTUBE_API_LIVE_BROADCAST_URL', 'https://www.googleapis.com/youtube/v3/videos'),
     'YOUTUBE_API_LIVE_CHAT_MESSAGE_URL': os.environ.get('YOUTUBE_API_LIVE_CHAT_MESSAGE_URL', 'https://www.googleapis.com/youtube/v3/liveChat/messages'),
-    'YOUTUBE_CHANNEL_ID': os.environ.get('YOUTUBE_CHANNEL_ID', 'UC1E-JS8L0j1Ei70D9VEFrPQ'),
     'YOUTUBE_LIVE_CHAT_MIN_POLLING_INTERVAL': float(os.environ.get('YOUTUBE_LIVE_CHAT_MIN_POLLING_INTERVAL', '18')),
+    'YOUTUBE_CHANNEL_ID': os.environ.get('YOUTUBE_CHANNEL_ID', 'destiny'),
 
     'TWITCH_API_KEY': os.environ.get('TWITCH_API_KEY', '<replace with twitch oauth key matching username>'),
     'YOUTUBE_API_KEY': os.environ.get('YOUTUBE_API_KEY', '<replace with youtube data API key>'),
