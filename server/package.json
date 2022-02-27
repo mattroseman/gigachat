@@ -1,0 +1,26 @@
+{
+  "name": "gigachat-server",
+  "version": "1.0.0",
+  "type": "module",
+  "description": "Websocket server for gigachat",
+  "main": "index.js",
+  "author": "Matthew Roseman",
+  "license": "MIT",
+  "scripts": {
+    "start": "node server.js",
+    "build": "webpack"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.17.5",
+    "@babel/eslint-parser": "^7.17.0",
+    "@babel/preset-env": "^7.16.11",
+    "babel-loader": "^8.2.3",
+    "webpack": "^5.69.1",
+    "webpack-cli": "^4.9.2"
+  },
+  "dependencies": {
+    "dotenv": "^16.0.0",
+    "redis": "^4.0.4",
+    "ws": "^8.5.0"
+  }
+}
