@@ -1,0 +1,26 @@
+{
+  "name": "gigachat",
+  "version": "1.0.0",
+  "description": "Frontend code for gigachat website",
+  "main": "index.js",
+  "author": "Matthew Roseman",
+  "license": "MIT",
+  "scripts": {
+    "build": "webpack",
+    "serve": "webpack serve"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.17.5",
+    "@babel/eslint-parser": "^7.17.0",
+    "@babel/preset-env": "^7.16.11",
+    "babel-loader": "^8.2.3",
+    "html-loader": "^3.1.0",
+    "html-webpack-plugin": "^5.5.0",
+    "webpack": "^5.69.1",
+    "webpack-cli": "^4.9.2",
+    "webpack-dev-server": "^4.7.4"
+  },
+  "dependencies": {
+    "jquery": "^3.6.0"
+  }
+}
