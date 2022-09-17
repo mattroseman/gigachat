@@ -29,6 +29,15 @@ module.exports = {
         }
       },
       {
+        test: /\.s[ac]ss$/,
+        exclude: /node_modules/,
+        use: [
+          "style-loader",
+          "css-loader",
+          "sass-loader"
+        ]
+      },
+      {
         test: /\.html$/,
         exclude: /node_modules/,
         use: {
@@ -39,7 +48,7 @@ module.exports = {
   },
   output: {
     filename: 'index.js',
-    path: path.resolve(__dirname, 'dist')
+    path: path.resolve(__dirname, 'public')
   },
   devServer: {
     static: {

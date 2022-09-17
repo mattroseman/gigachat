@@ -1,0 +1,20 @@
+#messages-container {
+  height: 100%;
+  width: 100%;
+
+  overflow-x: hidden;
+  overflow-y: scroll;
+
+  .chat-message {
+    margin: 10px 10px;
+  }
+
+  .emote {
+    display: inline-block;
+    // width: 20px;
+    overflow: hidden;
+
+    margin-top: auto;
+    margin-bottom: auto;
+  }
+}

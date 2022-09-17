@@ -1,0 +1,10 @@
+config:
+  target: "wss://chat.gigachat.dev"
+  phases:
+    - duration: 120
+      arrivalRate: 10
+scenarios:
+  - name: WebSocket Test
+    engine: ws
+    flow:
+      - think: 120
